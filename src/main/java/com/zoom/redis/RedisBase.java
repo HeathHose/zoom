@@ -2,7 +2,6 @@ package com.zoom.redis;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,11 +13,11 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by liangbo.zhou on 18-4-27.
+ * Created by liangbo.zhou on 18-5-9.
  */
-public class BaseRedisOperator {
+public class RedisBase implements RedisDataProcess {
 
-    private static final Logger logger = LogManager.getLogger(BaseRedisOperator.class);
+    private static final Logger logger = LogManager.getLogger(RedisBase.class);
     @Autowired
     protected RedisTemplate<String, String> redisTemplate;
     /**
@@ -28,14 +27,13 @@ public class BaseRedisOperator {
     public static final String KEY_PREFIX_SET = "dg:report:set:";
     public static final String KEY_PREFIX_LIST = "dg:report:list:";
 
-    /**
-     * 缓存value操作
-     * @param k
-     * @param v
-     * @param time
-     * @return
-     */
-    protected boolean cacheValue(String k, String v, long time) {
+    @Override
+    public void sortData() {
+
+    }
+
+    @Override
+    public boolean cacheValue(String k, String v, long time){
         String key = KEY_PREFIX_VALUE + k;
         try {
             ValueOperations<String, String> valueOps =  redisTemplate.opsForValue();
@@ -48,44 +46,28 @@ public class BaseRedisOperator {
         return false;
     }
 
-    /**
-     * 缓存value操作
-     * @param k
-     * @param v
-     * @return
-     */
-    protected boolean cacheValue(String k, String v) {
+    @Override
+    public boolean cacheValue(String k, String v) {
         return cacheValue(k, v, -1);
     }
 
-    /**
-     * 判断缓存是否存在
-     * @param k
-     * @return
-     */
-    protected boolean containsValueKey(String k) {
+    @Override
+    public boolean containsValueKey(String k) {
         return containsKey(KEY_PREFIX_VALUE + k);
     }
 
-    /**
-     * 判断缓存是否存在
-     * @param k
-     * @return
-     */
-    protected boolean containsSetKey(String k) {
+    @Override
+    public boolean containsSetKey(String k) {
         return containsKey(KEY_PREFIX_SET + k);
     }
 
-    /**
-     * 判断缓存是否存在
-     * @param k
-     * @return
-     */
-    protected boolean containsListKey(String k) {
+    @Override
+    public boolean containsListKey(String k) {
         return containsKey(KEY_PREFIX_LIST + k);
     }
 
-    protected boolean containsKey(String key) {
+    @Override
+    public boolean containsKey(String key) {
         try {
             return redisTemplate.hasKey(key);
         } catch (Throwable t) {
@@ -94,12 +76,8 @@ public class BaseRedisOperator {
         return false;
     }
 
-    /**
-     * 获取缓存
-     * @param k
-     * @return
-     */
-    protected String getValue(String k) {
+    @Override
+    public String getValue(String k) {
         try {
             ValueOperations<String, String> valueOps =  redisTemplate.opsForValue();
             return valueOps.get(KEY_PREFIX_VALUE + k);
@@ -109,29 +87,23 @@ public class BaseRedisOperator {
         return null;
     }
 
-    /**
-     * 移除缓存
-     * @param k
-     * @return
-     */
-    protected boolean removeValue(String k) {
+    @Override
+    public boolean removeValue(String k) {
         return remove(KEY_PREFIX_VALUE + k);
     }
 
-    protected boolean removeSet(String k) {
+    @Override
+    public boolean removeSet(String k) {
         return remove(KEY_PREFIX_SET + k);
     }
 
-    protected boolean removeList(String k) {
+    @Override
+    public boolean removeList(String k) {
         return remove(KEY_PREFIX_LIST + k);
     }
 
-    /**
-     * 移除缓存
-     * @param key
-     * @return
-     */
-    protected boolean remove(String key) {
+    @Override
+    public boolean remove(String key) {
         try {
             redisTemplate.delete(key);
             return true;
@@ -140,14 +112,9 @@ public class BaseRedisOperator {
         }
         return false;
     }
-    /**
-     * 缓存set操作
-     * @param k
-     * @param v
-     * @param time
-     * @return
-     */
-    protected boolean cacheSet(String k, String v, long time) {
+
+    @Override
+    public boolean cacheSet(String k, String v, long time) {
         String key = KEY_PREFIX_SET + k;
         try {
             SetOperations<String, String> valueOps =  redisTemplate.opsForSet();
@@ -160,24 +127,13 @@ public class BaseRedisOperator {
         return false;
     }
 
-    /**
-     * 缓存set
-     * @param k
-     * @param v
-     * @return
-     */
-    protected boolean cacheSet(String k, String v) {
+    @Override
+    public boolean cacheSet(String k, String v) {
         return cacheSet(k, v, -1);
     }
 
-    /**
-     * 缓存set
-     * @param k
-     * @param v
-     * @param time
-     * @return
-     */
-    protected boolean cacheSet(String k, Set<String> v, long time) {
+    @Override
+    public boolean cacheSet(String k, Set<String> v, long time){
         String key = KEY_PREFIX_SET + k;
         try {
             SetOperations<String, String> setOps =  redisTemplate.opsForSet();
@@ -190,22 +146,13 @@ public class BaseRedisOperator {
         return false;
     }
 
-    /**
-     * 缓存set
-     * @param k
-     * @param v
-     * @return
-     */
-    protected boolean cacheSet(String k, Set<String> v) {
+    @Override
+    public boolean cacheSet(String k, Set<String> v){
         return cacheSet(k, v, -1);
     }
 
-    /**
-     * 获取缓存set数据
-     * @param k
-     * @return
-     */
-    protected Set<String> getSet(String k) {
+    @Override
+    public Set<String> getSet(String k){
         try {
             SetOperations<String, String> setOps = redisTemplate.opsForSet();
             return setOps.members(KEY_PREFIX_SET + k);
@@ -215,14 +162,8 @@ public class BaseRedisOperator {
         return null;
     }
 
-    /**
-     * list缓存
-     * @param k
-     * @param v
-     * @param time
-     * @return
-     */
-    protected boolean cacheList(String k, String v, long time) {
+    @Override
+    public boolean cacheList(String k, String v, long time){
         String key = KEY_PREFIX_LIST + k;
         try {
             ListOperations<String, String> listOps =  redisTemplate.opsForList();
@@ -235,24 +176,13 @@ public class BaseRedisOperator {
         return false;
     }
 
-    /**
-     * 缓存list
-     * @param k
-     * @param v
-     * @return
-     */
-    protected boolean cacheList(String k, String v) {
+    @Override
+    public boolean cacheList(String k, String v){
         return cacheList(k, v, -1);
     }
 
-    /**
-     * 缓存list
-     * @param k
-     * @param v
-     * @param time
-     * @return
-     */
-    protected boolean cacheList(String k, List<String> v, long time) {
+    @Override
+    public boolean cacheList(String k, List<String> v, long time){
         String key = KEY_PREFIX_LIST + k;
         try {
             ListOperations<String, String> listOps =  redisTemplate.opsForList();
@@ -265,24 +195,13 @@ public class BaseRedisOperator {
         return false;
     }
 
-    /**
-     * 缓存list
-     * @param k
-     * @param v
-     * @return
-     */
-    protected boolean cacheList(String k, List<String> v) {
+    @Override
+    public boolean cacheList(String k, List<String> v){
         return cacheList(k, v, -1);
     }
 
-    /**
-     * 获取list缓存
-     * @param k
-     * @param start
-     * @param end
-     * @return
-     */
-    protected List<String> getList(String k, long start, long end) {
+    @Override
+    public List<String> getList(String k, long start, long end){
         try {
             ListOperations<String, String> listOps =  redisTemplate.opsForList();
             return listOps.range(KEY_PREFIX_LIST + k, start, end);
@@ -292,12 +211,8 @@ public class BaseRedisOperator {
         return null;
     }
 
-    /**
-     * 获取总条数, 可用于分页
-     * @param k
-     * @return
-     */
-    protected long getListSize(String k) {
+    @Override
+    public long getListSize(String k){
         try {
             ListOperations<String, String> listOps =  redisTemplate.opsForList();
             return listOps.size(KEY_PREFIX_LIST + k);
@@ -307,13 +222,8 @@ public class BaseRedisOperator {
         return 0;
     }
 
-    /**
-     * 获取总条数, 可用于分页
-     * @param listOps
-     * @param k
-     * @return
-     */
-    protected long getListSize(ListOperations<String, String> listOps, String k) {
+    @Override
+    public long getListSize(ListOperations<String, String> listOps, String k){
         try {
             return listOps.size(KEY_PREFIX_LIST + k);
         } catch (Throwable t) {
@@ -322,12 +232,9 @@ public class BaseRedisOperator {
         return 0;
     }
 
-    /**
-     * 移除list缓存
-     * @param k
-     * @return
-     */
-    protected boolean removeOneOfList(String k) {
+
+    @Override
+    public boolean removeOneOfList(String k){
         String key = KEY_PREFIX_LIST + k;
         try {
             ListOperations<String, String> listOps =  redisTemplate.opsForList();
