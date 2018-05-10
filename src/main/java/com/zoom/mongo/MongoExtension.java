@@ -1,9 +1,14 @@
 package com.zoom.mongo;
 
+import java.util.List;
+
 /**
  * Created by liangbo.zhou on 18-4-9.
  */
 public interface MongoExtension {
+
+    void initMongoCluster(List<MongoBackend.ShardNodeInfo> shards, List<MongoBackend.MongosNodeInfo> mongos,
+                          List<MongoBackend.ConfigServerInfo> configServers, String company, String task);
 
     void addCollection(String name);
 

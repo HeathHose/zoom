@@ -47,6 +47,7 @@ public class MongoBackend {
     public static final String INIT_MONGO_CLUSTER_PATH = "/mongo/init";
     public static final String ADD_SHARD_PATH = "/mongo/add";
     public static final String DEL_SHARD_PATH = "/mongo/del";
+    public static final String CHECK_MONGO_CLUSTER_PATH = "/mongo/check";
 
     public static class InitMongoClusterCmd extends AgentCmd{
         public List<ShardNodeInfo> shards;
@@ -54,21 +55,42 @@ public class MongoBackend {
         public List<ConfigServerInfo> configServers;
         public String company;
         public String task;
+
+        public InitMongoClusterCmd(List<ShardNodeInfo> shards, List<MongosNodeInfo> mongos,
+                                   List<ConfigServerInfo> configServers, String company, String task) {
+            this.shards = shards;
+            this.mongos = mongos;
+            this.configServers = configServers;
+            this.company = company;
+            this.task = task;
+        }
     }
 
     public static class InitMongoClusterRsp extends AgentRsp{}
 
     public static class AddShardSetCmd extends  AgentCmd{
+        public void setShards(List<ShardNodeInfo> shards) {
+            this.shards = shards;
+        }
+
         public List<ShardNodeInfo> shards;
     }
 
     public static class AddShardSetRsp extends AgentRsp{}
 
     public static class DelShardSetCmd extends  AgentCmd{
+        public void setShards(List<ShardNodeInfo> shards) {
+            this.shards = shards;
+        }
+
         public List<ShardNodeInfo> shards;
     }
 
     public static class DelShardSetRsp extends AgentRsp{}
+
+    public static class CheckMongoClusterCmd extends AgentCmd{}
+
+    public static class CheckClusterRsp extends AgentRsp{}
 
     public void initMongoCluster(InitMongoClusterCmd cmd){
         restf.asyncJsonPost(INIT_MONGO_CLUSTER_PATH, cmd, new AsyncRESTCallback() {
@@ -100,6 +122,20 @@ public class MongoBackend {
 
     public void delShardSet(DelShardSetCmd cmd){
         restf.asyncJsonPost(DEL_SHARD_PATH, cmd, new AsyncRESTCallback() {
+            @Override
+            public void fail(ErrorCode err) {
+
+            }
+
+            @Override
+            public void success(HttpEntity<String> responseEntity) {
+
+            }
+        });
+    }
+
+    public void checkMongoCluster(CheckMongoClusterCmd cmd){
+        restf.asyncJsonPost(CHECK_MONGO_CLUSTER_PATH, cmd, new AsyncRESTCallback() {
             @Override
             public void fail(ErrorCode err) {
 
